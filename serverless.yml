@@ -1,0 +1,44 @@
+# serverless.yml
+
+stage: dev
+
+service: rexi-product
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: ${opt:stage, self:stage}
+  memorySize: 128
+  region: us-east-2
+  config: ${file(./configs/${self:provider.stage}.yml)}
+  deploymentBucket:
+    name: ${self:service}-${self:provider.stage}-deployment
+  environment: 
+    BOT_ID: ${self:provider.config.BOT_ID}
+    CHAT_ID: ${self:provider.config.CHAT_ID}
+    THRESHOLD: ${self:provider.config.THRESHOLD}
+
+package:
+  individually: true
+
+functions:
+  rexi-product-notification:
+    handler: dist/index.handler
+    name: rexi-product-notification
+    reservedConcurrency: 1
+    package:
+      exclude:
+        - ./**
+      include:
+        - dist/**
+        - package-lock.json
+        - package.json
+    events:
+      - schedule:
+          name: rexi-product-scheduler
+          description: Trigger every 2 minutes for the fair price products
+          rate: rate(2 minutes)
+          enabled: true
+
+plugins:
+  - serverless-deployment-bucket
+  - serverless-plugin-include-dependencies
