@@ -2,12 +2,12 @@
 
 stage: dev
 
-service: rexi-product
+service: rexi
 provider:
   name: aws
   runtime: nodejs10.x
   stage: ${opt:stage, self:stage}
-  memorySize: 128
+  memorySize: 512
   region: us-east-2
   config: ${file(./configs/${self:provider.stage}.yml)}
   deploymentBucket:
@@ -24,6 +24,7 @@ functions:
   rexi-product-notification:
     handler: dist/index.handler
     name: rexi-product-notification
+    timeout: 10
     reservedConcurrency: 1
     package:
       exclude:

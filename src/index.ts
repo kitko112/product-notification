@@ -2,9 +2,6 @@ import { httpGet } from './httpRequest';
 import cheerio from 'cheerio';
 import products from './product.json';
 
-const CHAT_ID = process.env.CHAT_ID;
-const BOT_ID = process.env.BOT_ID;
-
 const scrapeAllPrices = (result: string) => {
     const $ = cheerio.load(result);
     const itemsSelector = '.a-offscreen';
@@ -26,6 +23,8 @@ const scrapeAllPrices = (result: string) => {
 }
 
 const notifyFairPrice = (prices: number[], threshold: number, url: string, name: string) => {
+    const CHAT_ID = process.env.CHAT_ID;
+    const BOT_ID = process.env.BOT_ID;
     const fairPrices = prices.filter((p) => { return p <= threshold });
     console.log(`all prices [${prices}], threshold: ${threshold}, fair prices: [${fairPrices}]`);
     if (fairPrices.length > 0) {
@@ -37,14 +36,14 @@ const notifyFairPrice = (prices: number[], threshold: number, url: string, name:
     }
 };
 
-exports.handler = () => {
-    products.map((product) => {
+export const handler = async () => {
+    await Promise.all(products.map((product) => {
         const { name, url, threshold } = product;
         console.log(`checking product '${name}'`)
-        httpGet(url)
+        return httpGet(url)
             .then(scrapeAllPrices)
             .then((prices) => notifyFairPrice(prices, threshold, url, name))
-            .catch(e => {});
-    });
+            .catch(e => { });
+    }));
     return 'done';
 };
