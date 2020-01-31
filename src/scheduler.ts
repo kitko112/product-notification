@@ -9,6 +9,6 @@ process.env.BOT_ID = BOT_ID;
 process.env.CHAT_ID = CHAT_ID;
 
 scheduleJob(
-    `*/30 * * * * *`,
+    `*/2 * * * *`,
     handler
 );

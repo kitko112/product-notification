@@ -23,10 +23,10 @@ const scrapeAllPrices = (result: string) => {
 }
 
 const notifyFairPrice = (prices: number[], threshold: number, url: string, name: string) => {
-    const CHAT_ID = process.env.CHAT_ID;
-    const BOT_ID = process.env.BOT_ID;
     const fairPrices = prices.filter((p) => { return p <= threshold });
     console.log(`all prices [${prices}], threshold: ${threshold}, fair prices: [${fairPrices}]`);
+    const CHAT_ID = process.env.CHAT_ID;
+    const BOT_ID = process.env.BOT_ID;
     if (fairPrices.length > 0) {
         const notification = encodeURI(`fair prices are found in ￥: [${fairPrices}], \nurl: ${url}`);
         const tgChannelUrl = `https://api.telegram.org/bot${BOT_ID}/sendMessage?chat_id=${CHAT_ID}&text=${notification}`
@@ -43,7 +43,7 @@ export const handler = async () => {
         return httpGet(url)
             .then(scrapeAllPrices)
             .then((prices) => notifyFairPrice(prices, threshold, url, name))
-            .catch(e => { });
+            .catch(e => {});
     }));
     return 'done';
 };
